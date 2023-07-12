@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <base target="_top" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Quick Start - Leaflet</title>
+
+    <link
+      rel="shortcut icon"
+      type="image/x-icon"
+      href="docs/images/favicon.ico"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      .leaflet-container {
+        height: 400px;
+        width: 600px;
+        max-width: 100%;
+        max-height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map" style="width: 100%; height: 100vh"></div>
+
+    <p>Click the button to get your coordinates.</p>
+
+    <button onclick="getLocation()">Try It</button>
+    <p id="demo"></p>
+
+    <script>
+      const map = L.map("map").setView([51.505, -0.09], 13);
+
+      const tiles = L.tileLayer(
+        "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          maxZoom: 19,
+          attribution:
+            '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        }
+      ).addTo(map);
+
+      //   const marker = L.marker([51.5, -0.09])
+      //     .addTo(map)
+      //     .bindPopup("<b>Hello world!</b><br />I am a popup.")
+      //     .openPopup();
+
+      console.log(L);
+
+      // const onMapClickMarker = (e) => {
+      //   L.marker([e.latlng.lat, e.latlng.lng])
+      //     .bindPopup(`lat :  ${e.latlng.lat} , lng :  ${e.latlng.lng}`)
+      //     .addTo(map)
+      //     .openPopup();
+      // };
+
+      const popup = L.popup();
+      // .setLatLng([51.513, -0.09])
+      // .setContent("I am a standalone popup.")
+      // .openOn(map);
+
+      function onMapClick(e) {
+        // popup
+        //   .setLatLng(e.latlng)
+        //   .setContent(`Click on : ${e.latlng.toString()}`)
+        //   .openOn(map);
+
+        // if(map.locate) {
+        //   map.locate({
+        //     setView: false,
+        //     watch: false
+        //   })
+        // }
+
+        var theMarker = {};
+
+        map.on("click", function (e) {
+          lat = e.latlng.lat;
+          lon = e.latlng.lng;
+          var userLatLng = e.latlng;
+
+          console.log(
+            "You clicked the map at LAT: " + lat + " and LONG: " + lon
+          );
+          //Clear existing marker,
+
+          function removeMarkerFunc(removeUserLocation, removeUserCircle) {
+            console.log("remove");
+            if (removeUserLocation && removeUserCircle) {
+              map.removeLayer(removeUserLocation);
+              map.removeLayer(removeUserCircle);
+            }
+            return;
+          }
+
+          if (theMarker != undefined) {
+            map.removeLayer(theMarker);
+          }
+
+          map.removeLayer(map.locate);
+          //Add a marker to show where you clicked.
+          map.theMarker = L.marker([lat, lon]).addTo(map);
+
+          map.setView(userLatLng);
+          theMarker.setLatLng(userLatLng);
+        });
+
+        // var marker = L.marker([e.latlng.lat, e.latlng.lng]).bindPopup(
+        //   "Your are here :)"
+        // );
+
+        // map.addLayer(marker);
+        console.log(`lat :  ${e.latlng.lat} , lng :  ${e.latlng.lng}`);
+        // removeMarker(marker);
+        // console.log(e);
+      }
+
+      // const removeMarker = (markerRem) => {
+      //   // map.removeLayer(markerRem);
+      //   console.log(markerRem);
+      // };
+
+      map
+        .locate({
+          setView: true,
+          watch: false,
+        }) /* This will return map so you can do chaining */
+        .on("locationfound", function (e) {
+          var marker = L.marker([e.latitude, e.longitude]).bindPopup(
+            "You are here :)"
+          );
+          var circle = L.circle([e.latitude, e.longitude], e.accuracy / 2, {
+            weight: 1,
+            color: "blue",
+            fillColor: "#cacaca",
+            fillOpacity: 0.2,
+          });
+          map.addLayer(marker);
+          map.addLayer(circle);
+          removeMarkerFunc(marker, circle);
+        })
+        .on("locationerror", function (e) {
+          console.log(e);
+          alert("Location access denied.");
+        });
+
+      map.on("click", onMapClick);
+      map.on("click", removeMarkerFunc);
+      //   map.on("click", onMapClickMarker);ّ
+    </script>
+  </body>
+</html>
